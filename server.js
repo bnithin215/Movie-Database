@@ -7,8 +7,8 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
-// Check for required environment variables
-if (!process.env.MONGO_URI) {
+// Check for required environment variables (only exit in development)
+if (!process.env.MONGO_URI && process.env.NODE_ENV !== 'production') {
     console.error("❌ MONGO_URI is missing. Check if .env exists and has the correct variable.");
     process.exit(1);
 }
@@ -20,16 +20,20 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => console.log("✅ MongoDB connected"))
-    .catch((err) => {
-        console.error("❌ MongoDB connection error:", err);
-        process.exit(1);
-    });
+// MongoDB connection (only connect if MONGO_URI exists)
+if (process.env.MONGO_URI) {
+    mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+        .then(() => console.log("✅ MongoDB connected"))
+        .catch((err) => {
+            console.error("❌ MongoDB connection error:", err);
+            if (process.env.NODE_ENV !== 'production') {
+                process.exit(1);
+            }
+        });
+}
 
 // API Routes
 const movieRoutes = require('./routes/movies');
