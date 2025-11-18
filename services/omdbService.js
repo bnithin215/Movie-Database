@@ -1,7 +1,7 @@
 const axios = require('axios');
 
-const OMDB_API_KEY = process.env.OMDB_API_KEY;
-const OMDB_API_URL = 'https://www.omdbapi.com/';
+const OMDB_API_KEY = process.env.OMDB_API_KEY || '28d4864'; // Fallback to default key
+const OMDB_API_URL = 'http://www.omdbapi.com/';
 
 // List of popular Indian movies and actors to prioritize
 const INDIAN_MOVIE_KEYWORDS = [
@@ -28,7 +28,18 @@ const INDIAN_ACTORS = [
  */
 async function searchMovies(query, year = '', type = '', page = 1) {
   try {
-    let url = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(query)}&page=${page}`;
+    if (!OMDB_API_KEY) {
+      throw new Error('OMDB API key is not configured');
+    }
+
+    // Build URL according to OMDB API documentation
+    // Format: http://www.omdbapi.com/?apikey=[yourkey]&s=[search]
+    let url = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(query)}`;
+
+    // Add optional parameters
+    if (page && page > 1) {
+      url += `&page=${page}`;
+    }
 
     if (year) {
       url += `&y=${year}`;
@@ -38,23 +49,33 @@ async function searchMovies(query, year = '', type = '', page = 1) {
       url += `&type=${type}`;
     }
 
-    const response = await axios.get(url);
+    // Add response format
+    url += `&r=json`;
+
+    console.log('OMDB Search URL:', url.replace(OMDB_API_KEY, '***')); // Log without exposing key
+
+    const response = await axios.get(url, {
+      timeout: 10000 // 10 second timeout
+    });
 
     if (response.data.Response === 'True') {
       return {
         success: true,
-        movies: response.data.Search,
-        totalResults: response.data.totalResults
+        movies: response.data.Search || [],
+        totalResults: parseInt(response.data.totalResults) || 0
       };
     } else {
       return {
         success: false,
-        error: response.data.Error
+        error: response.data.Error || 'Movie not found'
       };
     }
   } catch (error) {
-    console.error('OMDB search error:', error);
-    throw new Error('Failed to search OMDB database');
+    console.error('OMDB search error:', error.message);
+    if (error.response) {
+      console.error('OMDB API response:', error.response.data);
+    }
+    throw new Error(error.message || 'Failed to search OMDB database');
   }
 }
 
@@ -65,8 +86,16 @@ async function searchMovies(query, year = '', type = '', page = 1) {
  */
 async function getMovieDetails(imdbID) {
   try {
-    const url = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&i=${imdbID}&plot=full`;
-    const response = await axios.get(url);
+    if (!OMDB_API_KEY) {
+      throw new Error('OMDB API key is not configured');
+    }
+
+    // Format: http://www.omdbapi.com/?apikey=[yourkey]&i=[imdbid]
+    const url = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&i=${imdbID}&plot=full&r=json`;
+    
+    const response = await axios.get(url, {
+      timeout: 10000
+    });
 
     if (response.data.Response === 'True') {
       return {
@@ -76,12 +105,15 @@ async function getMovieDetails(imdbID) {
     } else {
       return {
         success: false,
-        error: response.data.Error
+        error: response.data.Error || 'Movie not found'
       };
     }
   } catch (error) {
-    console.error('OMDB get movie details error:', error);
-    throw new Error('Failed to get movie details from OMDB');
+    console.error('OMDB get movie details error:', error.message);
+    if (error.response) {
+      console.error('OMDB API response:', error.response.data);
+    }
+    throw new Error(error.message || 'Failed to get movie details from OMDB');
   }
 }
 
@@ -92,15 +124,47 @@ async function getMovieDetails(imdbID) {
  */
 async function getMultipleMovieDetails(movieList) {
   try {
-    const promises = movieList.map(movie =>
-      axios.get(`${OMDB_API_URL}?apikey=${OMDB_API_KEY}&i=${movie.imdbID}&plot=short`)
-    );
+    if (!OMDB_API_KEY) {
+      throw new Error('OMDB API key is not configured');
+    }
 
-    const responses = await Promise.all(promises);
-    return responses.map(response => response.data).filter(data => data.Response === 'True');
+    // Process in batches to avoid overwhelming the API
+    const batchSize = 5;
+    const allMovies = [];
+
+    for (let i = 0; i < movieList.length; i += batchSize) {
+      const batch = movieList.slice(i, i + batchSize);
+      const promises = batch.map(movie => {
+        const imdbID = movie.imdbID;
+        if (!imdbID) {
+          console.warn('Movie missing imdbID:', movie);
+          return Promise.resolve(null);
+        }
+        return axios.get(`${OMDB_API_URL}?apikey=${OMDB_API_KEY}&i=${imdbID}&plot=short&r=json`, {
+          timeout: 10000
+        }).catch(err => {
+          console.error(`Error fetching details for ${imdbID}:`, err.message);
+          return null;
+        });
+      });
+
+      const responses = await Promise.all(promises);
+      const validMovies = responses
+        .filter(res => res && res.data && res.data.Response === 'True')
+        .map(res => res.data);
+      
+      allMovies.push(...validMovies);
+
+      // Small delay between batches to avoid rate limiting
+      if (i + batchSize < movieList.length) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }
+
+    return allMovies;
   } catch (error) {
-    console.error('OMDB get multiple movie details error:', error);
-    throw new Error('Failed to get multiple movie details from OMDB');
+    console.error('OMDB get multiple movie details error:', error.message);
+    throw new Error(error.message || 'Failed to get multiple movie details from OMDB');
   }
 }
 

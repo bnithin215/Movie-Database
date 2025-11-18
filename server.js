@@ -13,10 +13,6 @@ if (!process.env.MONGO_URI) {
     process.exit(1);
 }
 
-if (!process.env.JWT_SECRET) {
-    console.warn("⚠️ JWT_SECRET is missing. Using default secret (not recommended for production)");
-}
-
 const app = express();
 
 // Middleware
@@ -36,11 +32,9 @@ mongoose.connect(process.env.MONGO_URI, {
     });
 
 // API Routes
-const authRoutes = require('./routes/auth');
 const movieRoutes = require('./routes/movies');
 const omdbRoutes = require('./routes/omdb');
 
-app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/omdb', omdbRoutes);
 

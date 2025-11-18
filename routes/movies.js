@@ -1,10 +1,9 @@
 const express = require('express');
 const Movie = require('../models/Movie');
-const auth = require('../middleware/authMiddleware');
 const router = express.Router();
 
-// Get all movies (protected route)
-router.get('/', auth, async (req, res) => {
+// Get all movies
+router.get('/', async (req, res) => {
   try {
     const movies = await Movie.find().sort({ createdAt: -1 });
     res.json(movies);
@@ -14,8 +13,8 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Create a new movie (protected route)
-router.post('/', auth, async (req, res) => {
+// Create a new movie
+router.post('/', async (req, res) => {
   try {
     const {
       title, genre, actor, rating, director, cast, poster,
@@ -45,8 +44,7 @@ router.post('/', auth, async (req, res) => {
       awards,
       trailer,
       boxOffice,
-      production,
-      createdBy: req.user.userId
+      production
     });
 
     await movie.save();
@@ -61,8 +59,8 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Get a specific movie by ID (protected route)
-router.get('/:id', auth, async (req, res) => {
+// Get a specific movie by ID
+router.get('/:id', async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
     if (!movie) {
@@ -75,8 +73,8 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// Update a movie (protected route)
-router.put('/:id', auth, async (req, res) => {
+// Update a movie
+router.put('/:id', async (req, res) => {
   try {
     const movie = await Movie.findByIdAndUpdate(
         req.params.id,
@@ -95,8 +93,8 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-// Delete a movie (protected route)
-router.delete('/:id', auth, async (req, res) => {
+// Delete a movie
+router.delete('/:id', async (req, res) => {
   try {
     const movie = await Movie.findByIdAndDelete(req.params.id);
     if (!movie) {

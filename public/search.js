@@ -139,7 +139,6 @@ let allMovies = [];
 let searchResults = [];
 let omdbResults = [];
 let currentView = 'grid';
-let currentUser = null;
 let activeTab = 'myCollection'; // 'myCollection' or 'omdb'
 
 // Initialize search page
@@ -148,40 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initializeSearchPage() {
-    // Check authentication
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/index.html';
-        return;
-    }
-
-    try {
-        // Verify token
-        const userResponse = await fetch('/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (!userResponse.ok) {
-            localStorage.removeItem('token');
-            window.location.href = '/index.html';
-            return;
-        }
-
-        currentUser = await userResponse.json();
-        await loadMovies();
-        setupEventListeners();
-    } catch (error) {
-        console.error('Error initializing search page:', error);
-        window.location.href = '/index.html';
-    }
+    await loadMovies();
+    setupEventListeners();
 }
 
 async function loadMovies() {
     try {
         showLoading(true);
-        const response = await fetch(MOVIES_API_URL, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        const response = await fetch(MOVIES_API_URL);
 
         if (response.ok) {
             allMovies = await response.json();
@@ -218,8 +191,6 @@ function setupEventListeners() {
     document.getElementById('gridViewBtn').addEventListener('click', () => switchView('grid'));
     document.getElementById('listViewBtn').addEventListener('click', () => switchView('list'));
 
-    // Logout
-    document.getElementById('navLogoutBtn').addEventListener('click', logout);
 
     // Quick filters (only for my collection)
     document.querySelectorAll('.quick-filter').forEach(button => {
@@ -435,8 +406,7 @@ async function addOMDBMovieToCollection(index) {
         const response = await fetch(MOVIES_API_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(movieData)
         });
@@ -873,8 +843,7 @@ async function editMovie(movieId, index) {
         const response = await fetch(`${MOVIES_API_URL}/${movieId}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ title: newTitle.trim() })
         });
@@ -908,8 +877,7 @@ async function deleteMovie(movieId, index) {
 
     try {
         const response = await fetch(`${MOVIES_API_URL}/${movieId}`, {
-            method: 'DELETE',
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            method: 'DELETE'
         });
 
         if (response.ok) {
@@ -935,10 +903,6 @@ async function deleteMovie(movieId, index) {
     }
 }
 
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/index.html';
-}
 
 // Utility functions
 function debounce(func, wait) {

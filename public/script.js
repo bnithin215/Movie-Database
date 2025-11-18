@@ -1,7 +1,5 @@
-const API_URL = '/api/auth';
 const MOVIES_API_URL = '/api/movies';
 let selectedRating = 0;
-let currentUser = null;
 let movies = [];
 let filteredMovies = [];
 let currentView = 'grid'; // 'grid' or 'list'
@@ -12,57 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initializeApp() {
-  const token = localStorage.getItem('token');
-
-  if (token) {
-    try {
-      // Verify token and get user info
-      const userResponse = await fetch('/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (userResponse.ok) {
-        currentUser = await userResponse.json();
-        // If user is already logged in, redirect to search page
-        window.location.href = '/search.html';
-        return;
-      } else {
-        // Token is invalid
-        localStorage.removeItem('token');
-        showAuthUI();
-      }
-    } catch (error) {
-      console.error('Error verifying token:', error);
-      localStorage.removeItem('token');
-      showAuthUI();
-    }
-  } else {
-    showAuthUI();
-  }
-
   setupEventListeners();
   setupStarRating();
+  fetchMovies();
+  showMovieUI();
 }
 
 function setupEventListeners() {
-  // Signup
-  const signupBtn = document.getElementById('signupBtn');
-  if (signupBtn) {
-    signupBtn.addEventListener('click', handleSignup);
-  }
-
-  // Login
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginBtn) {
-    loginBtn.addEventListener('click', handleLogin);
-  }
-
-  // Logout
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', handleLogout);
-  }
-
   // Movie form
   const movieForm = document.getElementById('movieForm');
   if (movieForm) {
@@ -101,176 +55,6 @@ function setupEventListeners() {
   if (gridView && listView) {
     gridView.addEventListener('click', () => switchView('grid'));
     listView.addEventListener('click', () => switchView('list'));
-  }
-
-  // Enter key listeners for auth forms
-  const authInputs = document.querySelectorAll('#signupForm input, #loginForm input');
-  authInputs.forEach(input => {
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const form = input.closest('div');
-        if (form.id === 'signupForm') {
-          handleSignup();
-        } else if (form.id === 'loginForm') {
-          handleLogin();
-        }
-      }
-    });
-  });
-}
-
-async function handleSignup() {
-  const username = document.getElementById('signupUsername').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value.trim();
-  const msgEl = document.getElementById('signupMsg');
-
-  // Clear previous messages
-  msgEl.textContent = '';
-  msgEl.className = '';
-
-  // Validation
-  if (!username || !email || !password) {
-    showMessage(msgEl, 'Please fill in all fields', 'error');
-    return;
-  }
-
-  if (password.length < 6) {
-    showMessage(msgEl, 'Password must be at least 6 characters long', 'error');
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    showMessage(msgEl, 'Please enter a valid email address', 'error');
-    return;
-  }
-
-  try {
-    const signupBtn = document.getElementById('signupBtn');
-    signupBtn.textContent = 'Creating Account...';
-    signupBtn.disabled = true;
-
-    const response = await fetch(`${API_URL}/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      showMessage(msgEl, 'Account created successfully!', 'success');
-
-      // Auto-login after successful signup
-      localStorage.setItem('token', data.token);
-      currentUser = data.user;
-
-      setTimeout(() => {
-        showMovieUI();
-        fetchMovies();
-      }, 1000);
-    } else {
-      showMessage(msgEl, data.error || 'Signup failed', 'error');
-    }
-  } catch (error) {
-    showMessage(msgEl, 'Network error. Please try again.', 'error');
-    console.error('Signup error:', error);
-  } finally {
-    const signupBtn = document.getElementById('signupBtn');
-    signupBtn.textContent = 'Sign Up';
-    signupBtn.disabled = false;
-  }
-}
-
-async function handleLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value.trim();
-  const msgEl = document.getElementById('loginMsg');
-
-  // Clear previous messages
-  msgEl.textContent = '';
-  msgEl.className = '';
-
-  if (!email || !password) {
-    showMessage(msgEl, 'Please fill in all fields', 'error');
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    showMessage(msgEl, 'Please enter a valid email address', 'error');
-    return;
-  }
-
-  try {
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.textContent = 'Logging In...';
-    loginBtn.disabled = true;
-
-    const response = await fetch(`${API_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json();
-
-    if (response.ok && data.token) {
-      localStorage.setItem('token', data.token);
-      currentUser = data.user;
-      showMessage(msgEl, 'Login successful!', 'success');
-
-      setTimeout(() => {
-        showMovieUI();
-        fetchMovies();
-      }, 500);
-    } else {
-      showMessage(msgEl, data.error || 'Login failed', 'error');
-    }
-  } catch (error) {
-    showMessage(msgEl, 'Network error. Please try again.', 'error');
-    console.error('Login error:', error);
-  } finally {
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.textContent = 'Log In';
-    loginBtn.disabled = false;
-  }
-}
-
-function handleLogout() {
-  localStorage.removeItem('token');
-  currentUser = null;
-  movies = [];
-  selectedRating = 0;
-  showAuthUI();
-  document.getElementById('movieList').innerHTML = '';
-}
-
-function showAuthUI() {
-  document.getElementById('authSection').style.display = 'block';
-  document.getElementById('logoutBtn').style.display = 'none';
-  document.getElementById('movieSection').style.display = 'none';
-
-  // Clear form fields
-  document.getElementById('signupUsername').value = '';
-  document.getElementById('signupEmail').value = '';
-  document.getElementById('signupPassword').value = '';
-  document.getElementById('loginEmail').value = '';
-  document.getElementById('loginPassword').value = '';
-  document.getElementById('signupMsg').textContent = '';
-  document.getElementById('loginMsg').textContent = '';
-}
-
-function showMovieUI() {
-  document.getElementById('authSection').style.display = 'none';
-  document.getElementById('logoutBtn').style.display = 'inline-block';
-  document.getElementById('movieSection').style.display = 'block';
-  document.getElementById('movieControls').style.display = 'block';
-  document.getElementById('mainNav').style.display = 'block';
-
-  // Setup navigation logout
-  const navLogoutBtn = document.getElementById('navLogoutBtn');
-  if (navLogoutBtn) {
-    navLogoutBtn.addEventListener('click', handleLogout);
   }
 }
 
@@ -323,8 +107,7 @@ async function handleAddMovie(e) {
     const response = await fetch(MOVIES_API_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(movie)
     });
@@ -360,12 +143,12 @@ async function handleAddMovie(e) {
 
 async function fetchMovies() {
   const loadingEl = document.getElementById('loading');
-  loadingEl.style.display = 'block';
+  if (loadingEl) {
+    loadingEl.style.display = 'block';
+  }
 
   try {
-    const response = await fetch(MOVIES_API_URL, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
+    const response = await fetch(MOVIES_API_URL);
 
     if (response.ok) {
       movies = await response.json();
@@ -380,7 +163,9 @@ async function fetchMovies() {
     console.error('Fetch movies error:', error);
     showTemporaryMessage('Network error while loading movies', 'error');
   } finally {
-    loadingEl.style.display = 'none';
+    if (loadingEl) {
+      loadingEl.style.display = 'none';
+    }
   }
 }
 
@@ -401,7 +186,7 @@ function renderMovies() {
     movieList.innerHTML = `
       <li class="no-results" style="grid-column: 1/-1;">
         <div class="movie-info">
-          <h3>${isFiltered ? '🔍 No movies match your filters' : '🎬 No movies in your collection yet!'}</h3>
+          <h3>${isFiltered ? '🔍 No movies match your filters' : '🎬 No movies in the collection yet!'}</h3>
           <p>${isFiltered ? 'Try adjusting your search criteria or clear filters.' : 'Add your first movie using the form above.'}</p>
         </div>
       </li>
@@ -458,7 +243,7 @@ function updateMovieStats() {
   if (!statsEl) return;
 
   if (movies.length === 0) {
-    statsEl.textContent = 'No movies in your collection yet';
+    statsEl.textContent = 'No movies in the collection yet';
     return;
   }
 
@@ -485,8 +270,7 @@ async function deleteMovie(movieId, index) {
 
   try {
     const response = await fetch(`${MOVIES_API_URL}/${movieId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      method: 'DELETE'
     });
 
     if (response.ok) {
@@ -516,8 +300,7 @@ async function editMovie(movieId, index) {
     const response = await fetch(`${MOVIES_API_URL}/${movieId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ title: newTitle.trim() })
     });
@@ -538,11 +321,6 @@ async function editMovie(movieId, index) {
 }
 
 // Utility functions
-function showMessage(element, message, type) {
-  element.textContent = message;
-  element.className = type;
-}
-
 function showTemporaryMessage(message, type) {
   // Create temporary message element
   const messageEl = document.createElement('div');
@@ -571,11 +349,6 @@ function showTemporaryMessage(message, type) {
       }
     }, 300);
   }, 3000);
-}
-
-function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
 }
 
 function escapeHtml(text) {
@@ -660,7 +433,7 @@ function updateFilterStats() {
   if (!statsEl) return;
 
   if (movies.length === 0) {
-    statsEl.textContent = 'No movies in your collection yet';
+    statsEl.textContent = 'No movies in the collection yet';
     return;
   }
 
@@ -685,4 +458,13 @@ function updateFilterStats() {
   `;
 }
 
-// End of script - all styling is now properly organized in styles.css
+function showMovieUI() {
+  const movieSection = document.getElementById('movieSection');
+  if (movieSection) {
+    movieSection.style.display = 'block';
+  }
+  const mainNav = document.getElementById('mainNav');
+  if (mainNav) {
+    mainNav.style.display = 'block';
+  }
+}

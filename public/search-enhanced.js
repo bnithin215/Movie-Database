@@ -9,7 +9,6 @@ let searchResults = [];
 let omdbResults = [];
 let activeTab = 'myCollection'; // 'myCollection' or 'omdb'
 let currentView = 'grid'; // 'grid' or 'list'
-let currentUser = null;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,37 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initializeApp() {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-        window.location.href = '/login.html';
-        return;
-    }
-
-    try {
-        // Verify token
-        const userResponse = await fetch('/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (userResponse.ok) {
-            currentUser = await userResponse.json();
-            await loadMovies();
-            setupEventListeners();
-        } else {
-            localStorage.removeItem('token');
-            window.location.href = '/login.html';
-        }
-    } catch (error) {
-        console.error('Error verifying token:', error);
-        window.location.href = '/login.html';
-    }
+    await loadMovies();
+    setupEventListeners();
 }
 
 function setupEventListeners() {
-    // Logout
-    document.getElementById('navLogoutBtn')?.addEventListener('click', handleLogout);
-
     // Tab switching
     document.getElementById('myCollectionTab')?.addEventListener('click', () => switchTab('myCollection'));
     document.getElementById('omdbSearchTab')?.addEventListener('click', () => switchTab('omdb'));
@@ -114,11 +87,6 @@ function setupEventListeners() {
     });
 }
 
-function handleLogout() {
-    localStorage.removeItem('token');
-    window.location.href = '/login.html';
-}
-
 function switchTab(tab) {
     activeTab = tab;
 
@@ -127,8 +95,8 @@ function switchTab(tab) {
     document.getElementById('omdbSearchTab').classList.toggle('active', tab === 'omdb');
 
     // Show/hide search forms
-    document.querySelector('.search-container').style.display = tab === 'myCollection' ? 'block' : 'none';
-    document.getElementById('omdbSearchForm').style.display = tab === 'omdb' ? 'block' : 'none';
+    document.querySelector('.search-container')?.style.setProperty('display', tab === 'myCollection' ? 'block' : 'none');
+    document.getElementById('omdbSearchForm')?.style.setProperty('display', tab === 'omdb' ? 'block' : 'none');
 
     // Clear and show appropriate results
     if (tab === 'myCollection') {
@@ -140,9 +108,7 @@ function switchTab(tab) {
 
 async function loadMovies() {
     try {
-        const response = await fetch(MOVIES_API, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        const response = await fetch(MOVIES_API);
 
         if (response.ok) {
             allMovies = await response.json();
@@ -150,7 +116,7 @@ async function loadMovies() {
         }
     } catch (error) {
         console.error('Error loading movies:', error);
-        showError('Failed to load your movie collection');
+        showError('Failed to load movie collection');
     }
 }
 
@@ -224,9 +190,11 @@ async function searchOMDBByQuery(query, year = '', type = '') {
         if (year) url += `&year=${year}`;
         if (type) url += `&type=${type}`;
 
-        const response = await fetch(url, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
 
@@ -235,26 +203,36 @@ async function searchOMDBByQuery(query, year = '', type = '') {
             const detailsResponse = await fetch(`${OMDB_API}/batch-details`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ movieList: data.movies })
             });
 
+            if (!detailsResponse.ok) {
+                throw new Error(`Failed to get movie details: ${detailsResponse.status}`);
+            }
+
             const detailsData = await detailsResponse.json();
 
-            if (detailsData.success) {
+            if (detailsData.success && detailsData.movies && detailsData.movies.length > 0) {
                 omdbResults = detailsData.movies;
+                displayOMDBResults();
+                updateOMDBStats();
+            } else {
+                // If batch details fails, use the search results directly
+                omdbResults = data.movies;
                 displayOMDBResults();
                 updateOMDBStats();
             }
         } else {
             omdbResults = [];
+            const errorMsg = data.error || 'No movies found';
+            showError(errorMsg);
             showNoResults();
         }
     } catch (error) {
         console.error('OMDB search error:', error);
-        showError('Failed to search OMDB database');
+        showError(`Failed to search OMDB database: ${error.message || 'Unknown error'}`);
     } finally {
         showLoading(false);
     }
@@ -271,9 +249,11 @@ async function searchByActor() {
     showLoading(true);
 
     try {
-        const response = await fetch(`${OMDB_API}/search-by-actor?actor=${encodeURIComponent(actor)}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        const response = await fetch(`${OMDB_API}/search-by-actor?actor=${encodeURIComponent(actor)}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
 
@@ -297,9 +277,11 @@ async function loadIndianMovies() {
     showLoading(true);
 
     try {
-        const response = await fetch(`${OMDB_API}/indian-movies?limit=20`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        const response = await fetch(`${OMDB_API}/indian-movies?limit=20`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
 
@@ -330,8 +312,8 @@ function displaySearchResults() {
 
     resultsContainer.innerHTML = '';
     resultsContainer.className = `search-results ${currentView}`;
-    statsContainer.style.display = 'block';
-    sortContainer.style.display = 'block';
+    if (statsContainer) statsContainer.style.display = 'block';
+    if (sortContainer) sortContainer.style.display = 'block';
 
     updateSearchStats();
 
@@ -352,7 +334,7 @@ function displayOMDBResults() {
 
     resultsContainer.innerHTML = '';
     resultsContainer.className = `search-results ${currentView}`;
-    sortContainer.style.display = 'block';
+    if (sortContainer) sortContainer.style.display = 'block';
 
     omdbResults.forEach((movie, index) => {
         const movieCard = createOMDBMovieCard(movie, index);
@@ -445,14 +427,13 @@ async function addOMDBMovieToCollection(index) {
         const response = await fetch(MOVIES_API, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(movieData)
         });
 
         if (response.ok) {
-            showSuccess(`"${omdbMovie.Title}" added to your collection!`);
+            showSuccess(`"${omdbMovie.Title}" added to collection!`);
             await loadMovies();
         } else {
             const error = await response.json();
@@ -576,8 +557,8 @@ function showAllMovies() {
 
 function switchView(view) {
     currentView = view;
-    document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
-    document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+    document.getElementById('gridViewBtn')?.classList.toggle('active', view === 'grid');
+    document.getElementById('listViewBtn')?.classList.toggle('active', view === 'list');
 
     if (activeTab === 'myCollection') {
         displaySearchResults();
@@ -588,23 +569,30 @@ function switchView(view) {
 
 function updateSearchStats() {
     const statsText = document.getElementById('searchStatsText');
-    statsText.innerHTML = `Found <strong>${searchResults.length}</strong> movies in your collection`;
+    if (statsText) {
+        statsText.innerHTML = `Found <strong>${searchResults.length}</strong> movies in collection`;
+    }
 }
 
 function updateOMDBStats() {
     const statsText = document.getElementById('searchStatsText');
-    statsText.innerHTML = `Found <strong>${omdbResults.length}</strong> movies in OMDB database`;
+    if (statsText) {
+        statsText.innerHTML = `Found <strong>${omdbResults.length}</strong> movies in OMDB database`;
+    }
 }
 
 function showWelcomeMessage() {
     const resultsContainer = document.getElementById('searchResults');
-    document.getElementById('searchStats').style.display = 'none';
-    document.getElementById('sortContainer').style.display = 'none';
+    const statsContainer = document.getElementById('searchStats');
+    const sortContainer = document.getElementById('sortContainer');
+    
+    if (statsContainer) statsContainer.style.display = 'none';
+    if (sortContainer) sortContainer.style.display = 'none';
 
     resultsContainer.innerHTML = `
         <div class="welcome-message">
             <h2>🎬 Welcome to Advanced Search</h2>
-            <p>Use the search form above to find specific movies in your collection.</p>
+            <p>Use the search form above to find specific movies in the collection.</p>
             <p>You can search by title, actor, director, genre, rating, or any combination!</p>
         </div>
     `;
@@ -612,8 +600,11 @@ function showWelcomeMessage() {
 
 function showOMDBWelcomeMessage() {
     const resultsContainer = document.getElementById('searchResults');
-    document.getElementById('searchStats').style.display = 'none';
-    document.getElementById('sortContainer').style.display = 'none';
+    const statsContainer = document.getElementById('searchStats');
+    const sortContainer = document.getElementById('sortContainer');
+    
+    if (statsContainer) statsContainer.style.display = 'none';
+    if (sortContainer) sortContainer.style.display = 'none';
 
     resultsContainer.innerHTML = `
         <div class="welcome-message">
@@ -640,11 +631,57 @@ function showNoResults() {
 }
 
 function showError(message) {
-    alert(message);
+    // Create a more visible error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 10000;
+        padding: 15px 20px;
+        background: #dc3545;
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        max-width: 400px;
+        font-weight: 500;
+    `;
+    errorDiv.textContent = message;
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+        errorDiv.style.opacity = '0';
+        errorDiv.style.transition = 'opacity 0.3s';
+        setTimeout(() => errorDiv.remove(), 300);
+    }, 5000);
 }
 
 function showSuccess(message) {
-    alert(message);
+    // Create a success message
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 10000;
+        padding: 15px 20px;
+        background: #198754;
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        max-width: 400px;
+        font-weight: 500;
+    `;
+    successDiv.textContent = message;
+    document.body.appendChild(successDiv);
+    
+    setTimeout(() => {
+        successDiv.style.opacity = '0';
+        successDiv.style.transition = 'opacity 0.3s';
+        setTimeout(() => successDiv.remove(), 300);
+    }, 3000);
 }
 
 function escapeHtml(text) {

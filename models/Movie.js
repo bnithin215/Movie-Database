@@ -78,11 +78,6 @@ const movieSchema = new mongoose.Schema({
   production: {
     type: String,
     trim: true
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the user who added this movie
-    required: true
   }
 }, {
   timestamps: true // Adds createdAt and updatedAt fields automatically

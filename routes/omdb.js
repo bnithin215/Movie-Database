@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const omdbService = require('../services/omdbService');
-const auth = require('../middleware/authMiddleware');
 
 /**
  * @route   GET /api/omdb/search
  * @desc    Search movies in OMDB database
- * @access  Protected
+ * @access  Public
  */
-router.get('/search', auth, async (req, res) => {
+router.get('/search', async (req, res) => {
   try {
     const { query, year, type, page } = req.query;
 
@@ -32,16 +31,20 @@ router.get('/search', auth, async (req, res) => {
     }
   } catch (error) {
     console.error('OMDB search error:', error);
-    res.status(500).json({ error: 'Failed to search movies' });
+    res.status(500).json({ 
+      success: false,
+      error: error.message || 'Failed to search movies',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
 /**
  * @route   GET /api/omdb/movie/:imdbID
  * @desc    Get detailed movie information by IMDB ID
- * @access  Protected
+ * @access  Public
  */
-router.get('/movie/:imdbID', auth, async (req, res) => {
+router.get('/movie/:imdbID', async (req, res) => {
   try {
     const { imdbID } = req.params;
 
@@ -71,9 +74,9 @@ router.get('/movie/:imdbID', auth, async (req, res) => {
 /**
  * @route   GET /api/omdb/indian-movies
  * @desc    Get popular Indian movies
- * @access  Protected
+ * @access  Public
  */
-router.get('/indian-movies', auth, async (req, res) => {
+router.get('/indian-movies', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
     const movies = await omdbService.searchIndianMovies(limit);
@@ -92,9 +95,9 @@ router.get('/indian-movies', auth, async (req, res) => {
 /**
  * @route   GET /api/omdb/search-by-actor
  * @desc    Search movies by actor name
- * @access  Protected
+ * @access  Public
  */
-router.get('/search-by-actor', auth, async (req, res) => {
+router.get('/search-by-actor', async (req, res) => {
   try {
     const { actor } = req.query;
 
@@ -118,9 +121,9 @@ router.get('/search-by-actor', auth, async (req, res) => {
 /**
  * @route   GET /api/omdb/popular-indian-actors
  * @desc    Get movies by popular Indian actors
- * @access  Protected
+ * @access  Public
  */
-router.get('/popular-indian-actors', auth, async (req, res) => {
+router.get('/popular-indian-actors', async (req, res) => {
   try {
     const actorsMovies = await omdbService.getPopularIndianActorsMovies();
 
@@ -137,9 +140,9 @@ router.get('/popular-indian-actors', auth, async (req, res) => {
 /**
  * @route   GET /api/omdb/batch-details
  * @desc    Get detailed information for multiple movies
- * @access  Protected
+ * @access  Public
  */
-router.post('/batch-details', auth, async (req, res) => {
+router.post('/batch-details', async (req, res) => {
   try {
     const { movieList } = req.body;
 
@@ -163,9 +166,9 @@ router.post('/batch-details', auth, async (req, res) => {
 /**
  * @route   GET /api/omdb/indian-actors
  * @desc    Get list of popular Indian actors
- * @access  Protected
+ * @access  Public
  */
-router.get('/indian-actors', auth, (req, res) => {
+router.get('/indian-actors', (req, res) => {
   res.json({
     success: true,
     actors: omdbService.INDIAN_ACTORS

@@ -9,47 +9,23 @@
   <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 </head>
 <body>
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
 <!-- Navigation -->
-<nav class="navbar" id="mainNav" style="display: none;">
+<nav class="navbar" id="mainNav">
   <div class="nav-container">
     <h1 class="nav-title">🎬 Movie Database</h1>
     <div class="nav-links">
       <a href="search.html" class="nav-link">Search Movies</a>
       <a href="index.html" class="nav-link active">Add Movies</a>
-      <button id="navLogoutBtn" class="logout-btn">Logout</button>
     </div>
   </div>
 </nav>
 
 <h1>🎬 Movie Database</h1>
 
-<!-- Authentication Section -->
-<div id="authSection">
-  <!-- Signup Form -->
-  <div id="signupForm">
-    <h2>Create Account</h2>
-    <input type="text" id="signupUsername" placeholder="Choose a username" required />
-    <input type="email" id="signupEmail" placeholder="Enter your email" required />
-    <input type="password" id="signupPassword" placeholder="Create a password" required />
-    <button id="signupBtn">Sign Up</button>
-    <p id="signupMsg"></p>
-  </div>
-
-  <!-- Login Form -->
-  <div id="loginForm">
-    <h2>Welcome Back</h2>
-    <input type="email" id="loginEmail" placeholder="Enter your email" required />
-    <input type="password" id="loginPassword" placeholder="Enter your password" required />
-    <button id="loginBtn">Log In</button>
-    <p id="loginMsg"></p>
-  </div>
-</div>
-
-<!-- Logout Button -->
-<button id="logoutBtn" style="display:none;">Logout</button>
-
 <!-- Movie Management Section -->
-<div id="movieSection" style="display:none;">
+<div id="movieSection">
   <!-- Movie Form -->
   <form id="movieForm">
     <input name="title" placeholder="Movie Title" required />
@@ -102,5 +78,26 @@
 </div>
 
 <script src="script.js"></script>
+<script>
+  // Theme Toggle Functionality
+  const themeToggle = document.getElementById('themeToggle');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  updateThemeIcon(currentTheme);
+  
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  });
+  
+  function updateThemeIcon(theme) {
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+</script>
 </body>
 </html>

@@ -9,6 +9,8 @@
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 </head>
 <body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
 <!-- Navigation -->
 <nav class="navbar">
     <div class="nav-container">
@@ -16,7 +18,6 @@
         <div class="nav-links">
             <a href="search.html" class="nav-link active">Search</a>
             <a href="index.html" class="nav-link">Add Movies</a>
-            <button id="navLogoutBtn" class="logout-btn">Logout</button>
         </div>
     </div>
 </nav>
@@ -259,5 +260,26 @@
 </div>
 
 <script src="search-enhanced.js"></script>
+<script>
+  // Theme Toggle Functionality
+  const themeToggle = document.getElementById('themeToggle');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  updateThemeIcon(currentTheme);
+  
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  });
+  
+  function updateThemeIcon(theme) {
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+</script>
 </body>
 </html>
