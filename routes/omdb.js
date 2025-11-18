@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const omdbService = require('../services/omdbService');
-const auth = require('../Middleware/authMiddleware');
+const auth = require('../middleware/authMiddleware');
 
 /**
  * @route   GET /api/omdb/search
