@@ -32,6 +32,53 @@ const movieSchema = new mongoose.Schema({
     type: String, // Could be changed to Array of Strings for better data structure
     trim: true
   },
+  // IMDB-specific fields
+  imdbID: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true // Allows null values while keeping unique constraint
+  },
+  imdbRating: {
+    type: String,
+    trim: true
+  },
+  year: {
+    type: String,
+    trim: true
+  },
+  runtime: {
+    type: String,
+    trim: true
+  },
+  plot: {
+    type: String,
+    trim: true
+  },
+  country: {
+    type: String,
+    trim: true
+  },
+  language: {
+    type: String,
+    trim: true
+  },
+  awards: {
+    type: String,
+    trim: true
+  },
+  trailer: {
+    type: String, // YouTube trailer URL or video ID
+    trim: true
+  },
+  boxOffice: {
+    type: String,
+    trim: true
+  },
+  production: {
+    type: String,
+    trim: true
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Reference to the user who added this movie

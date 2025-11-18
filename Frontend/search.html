@@ -124,6 +124,78 @@
     </div>
 </div>
 
+<!-- OMDB Search Form -->
+<div id="omdbSearchForm" class="search-container" style="display: none;">
+    <div class="search-form">
+        <h2>🌐 Discover Movies from OMDB</h2>
+
+        <!-- Quick Actions for Indian Movies -->
+        <div class="indian-movies-section">
+            <h3>🇮🇳 Indian Cinema</h3>
+            <div class="quick-action-buttons">
+                <button id="loadIndianMoviesBtn" class="action-btn featured">Load Popular Indian Movies</button>
+                <button id="loadBollywoodBtn" class="action-btn featured">Search Bollywood</button>
+            </div>
+        </div>
+
+        <!-- Search by Query -->
+        <div class="search-row">
+            <div class="search-field full-width">
+                <label for="omdbQuery">Search Movies</label>
+                <input type="text" id="omdbQuery" placeholder="Search for any movie (e.g., RRR, Baahubali, 3 Idiots)..." />
+                <small>Search the entire OMDB database</small>
+            </div>
+        </div>
+
+        <!-- Search by Actor -->
+        <div class="search-row">
+            <div class="search-field full-width">
+                <label for="omdbActorSearch">Search by Actor</label>
+                <input type="text" id="omdbActorSearch" placeholder="e.g., Shah Rukh Khan, Rajinikanth, Aamir Khan..." />
+                <small>Find movies featuring a specific actor</small>
+            </div>
+        </div>
+
+        <!-- Additional Filters -->
+        <div class="search-row">
+            <div class="search-field">
+                <label for="omdbYear">Year</label>
+                <input type="text" id="omdbYear" placeholder="e.g., 2023" />
+            </div>
+            <div class="search-field">
+                <label for="omdbType">Type</label>
+                <select id="omdbType">
+                    <option value="">Any Type</option>
+                    <option value="movie">Movies Only</option>
+                    <option value="series">Series Only</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Popular Indian Actors Quick Select -->
+        <div class="indian-actors-section">
+            <label>Popular Indian Actors:</label>
+            <div class="actor-chips">
+                <button class="actor-chip" data-actor="Shah Rukh Khan">Shah Rukh Khan</button>
+                <button class="actor-chip" data-actor="Amitabh Bachchan">Amitabh Bachchan</button>
+                <button class="actor-chip" data-actor="Aamir Khan">Aamir Khan</button>
+                <button class="actor-chip" data-actor="Rajinikanth">Rajinikanth</button>
+                <button class="actor-chip" data-actor="Allu Arjun">Allu Arjun</button>
+                <button class="actor-chip" data-actor="Prabhas">Prabhas</button>
+                <button class="actor-chip" data-actor="Deepika Padukone">Deepika Padukone</button>
+                <button class="actor-chip" data-actor="Alia Bhatt">Alia Bhatt</button>
+            </div>
+        </div>
+
+        <!-- Search Actions -->
+        <div class="search-actions">
+            <button id="omdbSearchBtn" class="search-btn primary">🔍 Search OMDB</button>
+            <button id="searchByActorBtn" class="search-btn primary">👤 Search by Actor</button>
+            <button id="clearOmdbBtn" class="search-btn secondary">Clear</button>
+        </div>
+    </div>
+</div>
+
 <!-- Sort Options -->
 <div class="sort-container" id="sortContainer" style="display: none;">
     <div class="sort-content">
@@ -186,6 +258,6 @@
     </div>
 </div>
 
-<script src="search.js"></script>
+<script src="search-enhanced.js"></script>
 </body>
 </html>
