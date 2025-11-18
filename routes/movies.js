@@ -1,6 +1,6 @@
 const express = require('express');
 const Movie = require('../models/Movie');
-const auth = require('../Middleware/authMiddleware');
+const auth = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // Get all movies (protected route)
