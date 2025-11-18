@@ -1475,3 +1475,390 @@ h1 {
   border-radius: 5px;
   border-left: 4px solid #51cf66;
 }
+/* Indian Movies Section Styles */
+.indian-movies-section {
+  background: rgba(255, 153, 0, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border: 2px solid rgba(255, 153, 0, 0.3);
+}
+
+.indian-movies-section h3 {
+  color: #ff9500;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+.quick-action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn.featured {
+  background: linear-gradient(45deg, #ff9500, #ffcc00);
+  color: #333;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+}
+
+.action-btn.featured:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 149, 0, 0.5);
+  background: linear-gradient(45deg, #ffcc00, #ff9500);
+}
+
+/* Indian Actors Section */
+.indian-actors-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.indian-actors-section label {
+  display: block;
+  color: #ffcc00;
+  font-weight: bold;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.actor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.actor-chip {
+  padding: 8px 16px;
+  background: rgba(255, 204, 0, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 204, 0, 0.4);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.actor-chip:hover {
+  background: rgba(255, 204, 0, 0.4);
+  border-color: #ffcc00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.actor-chip:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 204, 0, 0.3);
+}
+
+/* Action Button Variants */
+.action-btn.add {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+}
+
+.action-btn.add:hover {
+  background: linear-gradient(45deg, #45a049, #4CAF50);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.action-btn.details {
+  background: linear-gradient(45deg, #2196F3, #1976D2);
+  color: white;
+}
+
+.action-btn.details:hover {
+  background: linear-gradient(45deg, #1976D2, #2196F3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+.action-btn.trailer {
+  background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+  color: white;
+}
+
+.action-btn.trailer:hover {
+  background: linear-gradient(45deg, #7B1FA2, #9C27B0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+}
+
+/* Movie Card Enhancements */
+.movie-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.movie-poster {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover .movie-poster {
+  transform: scale(1.05);
+}
+
+.movie-content {
+  padding: 15px;
+}
+
+.movie-plot {
+  font-size: 0.9rem;
+  color: #ccc;
+  line-height: 1.6;
+  margin: 12px 0;
+  max-height: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.movie-year {
+  color: #aaa;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.movie-country,
+.movie-language {
+  font-size: 0.85rem;
+  color: #bbb;
+  margin: 5px 0;
+}
+
+.imdb-rating {
+  color: #f5c518;
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+/* Modal Styles */
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.8);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 5% auto;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  position: relative;
+  color: #fff;
+}
+
+.close {
+  color: #fff;
+  float: right;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  line-height: 1;
+}
+
+.close:hover,
+.close:focus {
+  color: #ffcc00;
+  text-decoration: none;
+}
+
+.modal-content h2 {
+  color: #ffcc00;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.modal-content p {
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+.modal-content strong {
+  color: #ffcc00;
+}
+
+.modal-content img {
+  display: block;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Search Results Grid/List View */
+.search-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.search-results.list {
+  grid-template-columns: 1fr;
+}
+
+.search-results.list .movie-card {
+  display: flex;
+  flex-direction: row;
+}
+
+.search-results.list .movie-poster {
+  width: 200px;
+  height: 300px;
+  border-radius: 8px 0 0 8px;
+  flex-shrink: 0;
+}
+
+.search-results.list .movie-content {
+  flex: 1;
+  padding: 20px;
+}
+
+/* Responsive Design for Indian Movies Section */
+@media (max-width: 768px) {
+  .quick-action-buttons {
+    flex-direction: column;
+  }
+
+  .action-btn.featured {
+    width: 100%;
+  }
+
+  .actor-chips {
+    justify-content: flex-start;
+  }
+
+  .search-results.list .movie-card {
+    flex-direction: column;
+  }
+
+  .search-results.list .movie-poster {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 10% auto;
+    padding: 20px;
+  }
+}
+
+/* Additional Navigation Styles */
+.navbar {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 15px 0;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-title {
+  color: #ffcc00;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(255, 204, 0, 0.2);
+  color: #ffcc00;
+}
+
+.logout-btn {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(45deg, #ee5a52, #ff6b6b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* Search Header */
+.search-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.search-header h1 {
+  color: #ffcc00;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.search-header p {
+  color: #ccc;
+  font-size: 1.1rem;
+}

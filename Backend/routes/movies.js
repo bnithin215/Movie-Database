@@ -17,7 +17,11 @@ router.get('/', auth, async (req, res) => {
 // Create a new movie (protected route)
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, genre, actor, rating, director, cast, poster } = req.body;
+    const {
+      title, genre, actor, rating, director, cast, poster,
+      imdbID, imdbRating, year, runtime, plot, country,
+      language, awards, trailer, boxOffice, production
+    } = req.body;
 
     if (!title || !genre) {
       return res.status(400).json({ error: 'Title and genre are required' });
@@ -31,6 +35,17 @@ router.post('/', auth, async (req, res) => {
       director,
       cast,
       poster,
+      imdbID,
+      imdbRating,
+      year,
+      runtime,
+      plot,
+      country,
+      language,
+      awards,
+      trailer,
+      boxOffice,
+      production,
       createdBy: req.user.userId
     });
 
@@ -38,6 +53,10 @@ router.post('/', auth, async (req, res) => {
     res.status(201).json(movie);
   } catch (error) {
     console.error('Error creating movie:', error);
+    // Handle duplicate imdbID error
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.imdbID) {
+      return res.status(400).json({ error: 'This movie is already in your collection' });
+    }
     res.status(500).json({ error: 'Failed to create movie' });
   }
 });

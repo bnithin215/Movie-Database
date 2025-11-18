@@ -40,9 +40,11 @@ mongoose.connect(process.env.MONGO_URI, {
 // API Routes - Make sure these are defined correctly
 const authRoutes = require('./routes/auth');
 const movieRoutes = require('./routes/movies');
+const omdbRoutes = require('./routes/omdb');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/omdb', omdbRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
